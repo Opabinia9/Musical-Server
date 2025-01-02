@@ -1,5 +1,6 @@
 import socket
 from playsound import playsound
+import os
 def songloader():
     songs = open("SongsList.txt", "r").read().split("\n")
     flag = False
@@ -29,16 +30,37 @@ def songloader():
     for i in range(len(z)):
         z[i][0] = z[i][0].replace("\"", "")
     return z
+trackValid = False
 songs = songloader()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(("localhost", 9999))
 server.listen()
 client, addr = server.accept()
 while True:
-    client.send("Please Select Track".encode('utf-8'))
-    msg = int(client.recv(1024).decode('utf-8'))
-    print("Now Playing \""+songs[msg][1]+"\"")
-    client.send(("Now Playing \""+songs[msg][1]+"\"").encode('utf-8'))
-    playsound(songs[msg][0])
-    print("Song \""+songs[msg][1]+"\" Finished Playing")
-    client.send(("Song \""+songs[msg][1]+"\" Finished Playing").encode('utf-8'))
+    try:
+        trackValid = False
+        NumberValid = False
+        client.send("Please Select Track".encode('utf-8'))
+        while not NumberValid:
+            try:
+                msg = int(client.recv(1024).decode('utf-8'))
+                NumberValid = True
+            except:
+                client.send("Error: Please enter a number".encode('utf-8'))
+        while not trackValid:
+            try:
+                assert(os.path.isfile(songs[msg][0]))
+                print("Now Playing \"" + songs[msg][1] + "\"")
+                client.send(("Now Playing \""+songs[msg][1]+"\"").encode('utf-8'))
+                playsound(songs[msg][0])
+                print("Song \"" + songs[msg][1] + "\" Finished Playing")
+                client.send(("Song \"" + songs[msg][1] + "\" Finished Playing").encode('utf-8'))
+                trackValid = True
+            except:
+                errmsg = "Error: Failed to play track " + str(msg)
+                print(errmsg)
+                client.send((errmsg+"\nPlease re-select").encode('utf-8'))
+                msg = int(client.recv(1024).decode('utf-8'))
+    except:
+        server.listen()
+        client, addr = server.accept()
