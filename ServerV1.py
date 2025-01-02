@@ -63,16 +63,20 @@ while True:
     try:
         trackValid = False
         NumberValid = False
+        first = True
         client.send(send.encode('utf-8'))
         while not NumberValid:
             try:
                 msg = (client.recv(1024).decode('utf-8'))
-                if msg == "show all tracks":
-                    print("showing all tracks")
+                if msg == "show all tracks" and first:
                     client.send(allsongs.encode('utf-8'))
+                    first = False
                     msg = int(client.recv(1024).decode('utf-8'))
+                else:
+                    msg = int(msg)
                 NumberValid = True
-            except:
+            except ValueError:
+                print("")
                 client.send("Error: Please enter a number".encode('utf-8'))
         while not trackValid:
             try:
@@ -83,11 +87,24 @@ while True:
                 print("Song \"" + songs[msg][1] + "\" Finished Playing")
                 client.send(("Song \"" + songs[msg][1] + "\" Finished Playing").encode('utf-8'))
                 trackValid = True
-            except:
+            except AssertionError:
                 errmsg = "Error: Failed to play track " + str(msg)
                 print(errmsg)
                 client.send((errmsg+"\nPlease re-select").encode('utf-8'))
-                msg = int(client.recv(1024).decode('utf-8'))
-    except:
+                NumberValid = False
+                while not NumberValid:
+                    try:
+                        msg = (client.recv(1024).decode('utf-8'))
+                        if msg == "show all tracks" and first:
+                            client.send(allsongs.encode('utf-8'))
+                            first = False
+                            msg = int(client.recv(1024).decode('utf-8'))
+                        else:
+                            msg = int(msg)
+                        NumberValid = True
+                    except ValueError:
+                        client.send("Error: Please enter a number".encode('utf-8'))
+    except ConnectionAbortedError:
+        print("ConnectionAborted\nWaiting for new client...")
         server.listen()
         client, addr = server.accept()
