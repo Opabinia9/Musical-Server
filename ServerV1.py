@@ -30,20 +30,47 @@ def songloader():
     for i in range(len(z)):
         z[i][0] = z[i][0].replace("\"", "")
     return z
+def openingmsg(song):
+    i = str(len(song))
+    send = ('''
+    -----------------------------------------------------
+    |               Please Select Track                 |
+    |              Tracks between 0-'''+i+'''                 |
+    | enter "show all tracks" to give all track titles  |
+    |            Juke box                               |
+    |                - Sebation Price                   |
+    -----------------------------------------------------
+    ''')
+    return str(send)
+def showall(song):
+    thelist = "|-------------------------\n"
+    for i in range(len(song)):
+        add = str(song[i][1])
+        thelist += "|"+add+"\n"
+    thelist += "| Please Select a track\n"
+    thelist += "|-------------------------"
+    return thelist
 trackValid = False
 songs = songloader()
+allsongs = showall(songs)
+send = openingmsg(songs)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(("localhost", 9999))
 server.listen()
 client, addr = server.accept()
+print("server connected")
 while True:
     try:
         trackValid = False
         NumberValid = False
-        client.send("Please Select Track".encode('utf-8'))
+        client.send(send.encode('utf-8'))
         while not NumberValid:
             try:
-                msg = int(client.recv(1024).decode('utf-8'))
+                msg = (client.recv(1024).decode('utf-8'))
+                if msg == "show all tracks":
+                    print("showing all tracks")
+                    client.send(allsongs.encode('utf-8'))
+                    msg = int(client.recv(1024).decode('utf-8'))
                 NumberValid = True
             except:
                 client.send("Error: Please enter a number".encode('utf-8'))

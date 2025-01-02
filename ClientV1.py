@@ -16,7 +16,11 @@ client.connect(("localhost", 9999))
 while True:
     print(client.recv(1024).decode('utf-8'))
     client.send(input("Message: ").encode('utf-8'))
-    msg = (client.recv(1024).decode('utf-8'))
+    msg = (client.recv(8192).decode('utf-8'))
+    if "|-------------------------" in msg:
+        print(msg)
+        client.send(input("Message: ").encode('utf-8'))
+        msg = (client.recv(1024).decode('utf-8'))
     if "Error: " in msg:
         msg = errorSolver(msg)
     print(msg)
