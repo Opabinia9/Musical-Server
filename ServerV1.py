@@ -31,7 +31,7 @@ def songloader():
         z[i][0] = z[i][0].replace("\"", "")
     return z
 def openingmsg(song):
-    i = str(len(song))
+    i = str(len(song)-1)
     send = ('''
     -----------------------------------------------------
     |               Please Select Track                 |
@@ -46,7 +46,7 @@ def showall(song):
     thelist = "|-------------------------\n"
     for i in range(len(song)):
         add = str(song[i][1])
-        thelist += "|"+add+"\n"
+        thelist += "|"+str(i)+" "+add+"\n"
     thelist += "| Please Select a track\n"
     thelist += "|-------------------------"
     return thelist
@@ -55,7 +55,7 @@ songs = songloader()
 allsongs = showall(songs)
 send = openingmsg(songs)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("localhost", 9999))
+server.bind(("192.168.61.146", 9999))
 server.listen()
 client, addr = server.accept()
 print("server connected")
