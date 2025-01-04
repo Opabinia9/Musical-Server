@@ -50,17 +50,16 @@ def showall(song):
     thelist += "| Please Select a track\n"
     thelist += "|-------------------------"
     return thelist
-trackValid = False
-songs = songloader()
-allsongs = showall(songs)
-send = openingmsg(songs)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("192.168.61.146", 9999))
+server.bind(("localhost", 9999))
 server.listen()
 client, addr = server.accept()
 print("server connected")
 while True:
     try:
+        songs = songloader()
+        send = openingmsg(songs)
+        allsongs = showall(songs)
         trackValid = False
         NumberValid = False
         first = True
@@ -104,7 +103,30 @@ while True:
                         NumberValid = True
                     except ValueError:
                         client.send("Error: Please enter a number".encode('utf-8'))
+            except IndexError:
+                errmsg = "Error: " + str(msg)+" outside of Index"
+                print(errmsg)
+                client.send((errmsg+"\nPlease re-select").encode('utf-8'))
+                NumberValid = False
+                while not NumberValid:
+                    try:
+                        msg = (client.recv(1024).decode('utf-8'))
+                        if msg == "show all tracks" and first:
+                            client.send(allsongs.encode('utf-8'))
+                            first = False
+                            msg = int(client.recv(1024).decode('utf-8'))
+                        else:
+                            msg = int(msg)
+                        NumberValid = True
+                    except ValueError:
+                        client.send("Error: Please enter a number".encode('utf-8'))
     except ConnectionAbortedError:
         print("ConnectionAborted\nWaiting for new client...")
         server.listen()
         client, addr = server.accept()
+        print("server connected")
+    except ConnectionResetError:
+        print("ConnectionResetError\nWaiting for new client...")
+        server.listen()
+        client, addr = server.accept()
+        print("server connected")
