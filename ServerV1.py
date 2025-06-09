@@ -2,6 +2,7 @@ import socket
 from playsound import playsound
 import os
 def songloader():
+    #replace SongsList.txt with path to songslist
     songs = open("SongsList.txt", "r").read().split("\n")
     flag = False
     flaga = "\\"
@@ -51,6 +52,7 @@ def showall(song):
     thelist += "|-------------------------"
     return thelist
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#replace localhost with client ip adress for network use
 server.bind(("localhost", 9999))
 server.listen()
 client, addr = server.accept()
