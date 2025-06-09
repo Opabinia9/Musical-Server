@@ -12,6 +12,7 @@ def errorSolver(ermsg):
             Error = False
     return ermsg
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#replace localhost with server ip Adress for network use
 client.connect(("localhost", 9999))
 while True:
     print(client.recv(8192).decode('utf-8'))
